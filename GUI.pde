@@ -32,8 +32,8 @@ class GUI {
   void action(){
     if(!mouseReleased)return;
     if(x<mouseX&&mouseX<x+sizeX&&y<mouseY&&mouseY<y+sizeY){
-      if(event.prohibitResuming)return;
-      event.selected=text;
+      //if(event.prohibitResuming)return;
+      //event.selected=text;
       event.globals.load("coroutine.resume(co)").call();
     }
   }

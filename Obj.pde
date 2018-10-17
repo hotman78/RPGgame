@@ -3,20 +3,22 @@ class Obj{
   String[] code;
   boolean canMove=true;
   boolean isTalking=false;
-  Obj(int x,int y){
+  Event event;
+  Obj(int x,int y,String eventPath){
     this.x=x;
     this.y=y;
     px=x*128+64;
     py=y*128+64;
     scale=16;
-    code=loadStrings("object/npc.text"); 
+    event=e.addEvent(eventPath,x,y);
+    event.setObj(this);
   }
   void draw(){
-    x=constrain(x,0,width/128-1);
-    y=constrain(y,0,height/128-1);
-    px=constrain(px,64,width-64);
-    py=constrain(py,64,height-64);
-    ellipse(px,py,128,128);
+    /*x=constrain(x,0,stage.mapImage.width/16-1);
+    y=constrain(y,0,stage.mapImage.height/16-1);
+    px=constrain(px,64,stage.mapImage.width*8-64);
+    py=constrain(py,64,stage.mapImage.height*8-64);
+    ellipse(px-stage.cameraX,py-stage.cameraY,128,128);
     switch(isMoving){
       case 1:py-=scale;break;
       case 2:px-=scale;break;
@@ -24,7 +26,7 @@ class Obj{
       case 4:py+=scale;break;
     }
     nextMoveDelay--;
-    if(nextMoveDelay==0)isMoving=0;
+    if(nextMoveDelay==0)isMoving=0;*/
   }
   void move(int f){
     if(!canMove)return;
@@ -63,9 +65,9 @@ class Obj{
     canMove=true;
   }
   void talk(){
-    if(player.isTalking)return;
+    if(player.isTalking||player.talkingWait!=0)return;
     player.isTalking=true;
-    e.addEvent(code);
+    event.doFunction("talkEvent");
   }
 }
 

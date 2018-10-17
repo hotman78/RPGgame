@@ -3,13 +3,13 @@ class ObjectManager{
   ObjectManager(){
     object=new ArrayList<Obj>();
   }
-  Obj addObject(int x,int y){
-    Obj obj=new Obj(x,y);
+  Obj addObject(int x,int y,String eventPath){
+    Obj obj=new Obj(x,y,eventPath);
     object.add(obj);
     return obj;
   }
-  Player addPlayer(int x,int y){
-    Player player=new Player(x,y);
+  Player addPlayer(int x,int y,String eventPath){
+    Player player=new Player(x,y,eventPath);
     object.add(player);
     return player;
   }

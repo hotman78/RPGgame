@@ -1,15 +1,11 @@
 class Player extends Obj{
-  int x,y,px,py;
   float sx,sy,cx,cy,angle;
-   Player(int x,int y){
-    super(x,y);
-    //g.addButton(width/3,height-width,width/3,width/3,width/3,"上",new Move(1)).isContinuous();
-    //g.addButton(0,height-width+width/3,width/3,width/3,width/3,"左",new Move(2)).isContinuous();
-    //g.addButton(width/3*2,height-width+width/3,width/3,width/3,width/3,"右",new Move(3)).isContinuous();
-    //g.addButton(width/3,height-width+width/3,width/3,width/3,width/3,"",new Talk());
-    //g.addButton(width/3,height-width+width/3*2,width/3,width/3,width/3,"下",new Move(4)).isContinuous();
+  int talkingWait;
+   Player(int x,int y,String eventPath){
+    super(x,y,eventPath);
   }
   void draw(){
+    if(talkingWait!=0)talkingWait--;
     super.draw();
     control();
   }
