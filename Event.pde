@@ -2,29 +2,34 @@ import org.luaj.vm2.*;
 import org.luaj.vm2.lib.jse.*;
 import org.luaj.vm2.lib.*;
 class Event {
-  float x, y, px, py, v;
-  Direction facingDirection=Direction.DOWN;
-  Direction movingDirection=Direction.NONE;
-  int movingDelay;
-  Globals globals;
-  Obj object;
-  boolean dead=false, isMoving=false;
+  public Globals globals;
+  public float x,y,px,py,fx,fy,v;
+  public Direction facingDirection=Direction.DOWN;
+  public Direction movingDirection=Direction.NONE;
+  public int movingDelay,talkingWait=0,chara;
+  public boolean isTalking=false;
+  public boolean dead=false, isMoving=false;
+  public PImage[] charaChips=new PImage[24];
   Event(String path, float x, float y) {
-    this.x=x;
-    this.y=y;
-    px=x*128+64;
-    py=y*128+64;
-    v=16;
+    v=16.0;
+    PImage charaChip=loadImage("Wolfarl.png");
+    for(int i=0;i<6;i++)for(int j=0;j<4;j++){
+      charaChips[j*6+i]=charaChip.get(i*charaChip.width/6,j*charaChip.height/4,charaChip.width/6,charaChip.height/4);
+    }
     globals = JsePlatform.standardGlobals();
+    globals.set("x", x);
+    globals.set("y", y);
+    globals.set("px", x*128+64);
+    globals.set("py", y*128+64);
     globals.set("exit", new Exit());
     globals.set("addEvent", new AddEvent());
     globals.set("kill", new Kill());
     globals.set("move", new Move());
     globals.set("p", CoerceJavaToLua.coerce(pApplet));
-    globals.set("g", CoerceJavaToLua.coerce(g));
-    globals.set("o", CoerceJavaToLua.coerce(o));
+    globals.set("e", CoerceJavaToLua.coerce(this));
     globals.load(new JseBaseLib());
     globals.load(new PackageLib());
+    globals.load(new MathLib());
     globals.load(new DebugLib());
     String[] command=loadStrings("libs/command.lua");
     String[] codes=loadStrings(path);
@@ -33,7 +38,12 @@ class Event {
     doFunction("setup");
   }
   void draw() {
-    if (movingDirection.get()!=null) {
+    if(talkingWait>0)talkingWait--;
+    x=globals.get("x").tofloat();
+    y=globals.get("y").tofloat();
+    px=globals.get("px").tofloat();
+    py=globals.get("py").tofloat();
+    if (movingDirection!=Direction.NONE) {
       if (movingDelay==0) {
         movingDirection=Direction.NONE;
         return;
@@ -47,38 +57,64 @@ class Event {
     y=constrain(y, 0, stage.mapImage.height/16-1);
     px=constrain(px, 64, stage.mapImage.width*8-64);
     py=constrain(py, 64, stage.mapImage.height*8-64);
-    ellipse(px-stage.cameraX, py-stage.cameraY, 128, 128);
+    imageMode(CENTER);
+    int id=0;
+    switch(facingDirection){
+      case DOWN:id=0;break;
+      case LEFT:id=2;break;
+      case RIGHT:id=4;break;
+      case UP:id=6;break;
+      case LEFTDOWN:id=1;break;
+      case RIGHTDOWN:id=3;break;
+      case LEFTUP:id=5;break;
+      case RIGHTUP:id=7;break;
+    }
+    if(frameCount%10==0)chara++;
+    if(frameCount%10==0&&chara==3)chara=0;
+    image(charaChips[id*3+chara],px-stage.cameraX, py-stage.cameraY,128*charaChips[id*3+chara].width/charaChips[chara].height,128);
+    globals.set("x",x);
+    globals.set("y",y);
+    globals.set("px",px);
+    globals.set("py",py);
+  }
+  void set(String name,LuaValue data){
+    globals.set(name,data);
+  }
+  void set(String name,String data){
+    globals.set(name,data);
+  }
+  void handleTalkEvent(float x,float y){
+    Event event=e.exist(x,y);
+    if(event==null||event.isTalking||event.talkingWait!=0)return;
+    event.isTalking=true;
+    if (event.globals.get("talkEvent").isnil())return;
+    event.globals.load("co=coroutine.create(function()  talkEvent()  exit()  end)").call();
+    event.globals.load("coroutine.resume(co)").call();
   }
   void move(Direction d) {
+    x=globals.get("x").tofloat();
+    y=globals.get("y").tofloat();
+    px=globals.get("px").tofloat();
+    py=globals.get("py").tofloat();
+    if(movingDelay!=0)return;
+    if(d==Direction.NONE)return;
     facingDirection=d;
+    fx=x+d.get().x;
+    fy=y+d.get().y;
     if (e.exist(x+d.get().x, y+d.get().y)!=null)return;
     movingDirection=d;
-    x=x+d.get().x;
-    y=y+d.get().y;
+    x+=d.get().x;
+    y+=d.get().y;
     movingDelay=8;
+    globals.set("x",x);
+    globals.set("y",y);
+    globals.set("px",px);
+    globals.set("py",py);
   }
   void doFunction(String function) {
     if (globals.get(function).isnil())return;
     globals.load("co=coroutine.create("+function+")").call();
     globals.load("coroutine.resume(co)").call();
-  }
-  LuaValue get(String name) {
-    return globals.get(name);
-  }
-  void set(String name, LuaValue value) {
-    globals.set(name, value);
-  }
-  void set(String name, String value) {
-    globals.set(name, value);
-  }
-  void set(String name, int value) {
-    globals.set(name, value);
-  }
-  void set(String name, float value) {
-    globals.set(name, value);
-  }
-  void setObj(Obj object) {
-    this.object=object;
   }
   class AddEvent extends OneArgFunction {
     public LuaValue call(LuaValue value) {
@@ -89,12 +125,12 @@ class Event {
   class Move extends OneArgFunction {
     public LuaValue call(LuaValue value) { 
       Direction d=null;
-      if (value.isstring()){
-        d =Direction.valueOf(value.toString());
-      }else if(value.isint()){
+      if(value.isint()){
         d=Direction.values()[value.toint()];
+      }else if (value.isstring()){
+        d =Direction.valueOf(value.toString());
       }
-      move(d);
+      if(d!=null)move(d);
       return CoerceJavaToLua.coerce(true);
     }
   }
@@ -106,20 +142,17 @@ class Event {
   }
   class Exit extends ZeroArgFunction {
     public LuaValue call() {
-      player.isTalking=false;
-      player.talkingWait=5;
+      isTalking=false;
+      talkingWait=5;
       return LuaValue.valueOf(true);
     }
   }
 }
 class EventManager {
+ 
   ArrayList<Event> events;
-  TextWindow talkWindow;
-  HashMap<String, String> var=new HashMap<String, String>();
   EventManager() {
     events=new ArrayList<Event>();
-    talkWindow=g.addTextWindow(0, height-500, width, 500, "");
-    talkWindow.setVisible(false);
   }
   Event addEvent(String path, float x, float y) {
     Event event=new Event(path, x, y);
@@ -145,5 +178,10 @@ class EventManager {
       if (events.get(i).x==x&&events.get(i).y==y)return events.get(i);
     }
     return null;
+  }
+  void onDown(){
+   for (int i=0; i<events.size(); i++) {
+      events.get(i).doFunction("onDown");
+    }
   }
 }

@@ -1,12 +1,9 @@
 function draw()
-print("a")
-  if (not p.mousePressed) then return end
-  print("b")
-  local dx=p.mouseX-p.startX
-  local dy=p.mouseY-p.startY
-  print("c")
-  p:line(p.mouseX,p.mouseY,p.startX,p.startY)
-  print("d")
-  local angle = math.floor(atan2(dy,dx)*4/math.pi)
-  move(angle)
+  playerMove1()
+end
+
+function mouseReleased()
+  if p:dist(p.mouseX,p.mouseY,p.startX,p.startY)<100 then
+    e:handleTalkEvent(fx(),fy())
+  end
 end

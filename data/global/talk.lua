@@ -1,12 +1,12 @@
-
 function setup()
+  canResume=false
+end
+function draw()
   x=0
   y=p.height-500
   width=p.width
   height=500
   textSize=100
-end 
-function draw()
   p:fill(0,0,255,100)
   p:strokeJoin(ROUND)
   p:strokeWeight(10)
@@ -20,6 +20,9 @@ function draw()
 end
 
 function mouseReleased()
-  kill()
-	 coroutine.resume(coro)
+  if canResume then
+    kill()
+	   coroutine.resume(coro)
+	 else canResume=true
+	 end
 end
