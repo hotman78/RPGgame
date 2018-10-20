@@ -64,7 +64,6 @@ class TouchManager extends GestureDetector.SimpleOnGestureListener{
   }
   @Override
   boolean onDown(MotionEvent event){
-    e.onDown();
     return super.onDown(event);
   }
 }
