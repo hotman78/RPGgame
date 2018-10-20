@@ -15,6 +15,7 @@ function Character:talkEvent()
   
 end
 function Character:draw()
+  print("b")
   if self.movingDelay>0 then
     self.px=self.px+Direction[self.angle][1]*16
     self.py=self.py+Direction[self.angle][2]*16
