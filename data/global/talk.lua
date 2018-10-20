@@ -1,7 +1,12 @@
-function setup()
+talk={}
+function talk:new()
+  local obj={}
+  return setmetatable(obj, {__index = talk})
+end
+function talk:setup()
   canResume=false
 end
-function draw()
+function talk:draw()
   x=0
   y=p.height-500
   width=p.width
@@ -19,7 +24,7 @@ function draw()
   end
 end
 
-function mouseReleased()
+function talk:mouseReleased()
   if canResume then
     kill()
 	   coroutine.resume(coro)

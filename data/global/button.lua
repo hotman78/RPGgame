@@ -1,8 +1,9 @@
-function setup()
+button={}
+function button:setup()
   canResume=false
   textSize=100
 end
-function draw()
+function button:draw()
   p:fill(0,0,255,100)
   p:strokeJoin(ROUND)
   p:strokeWeight(10)
@@ -15,12 +16,12 @@ function draw()
   end
 end
 
-function addFunction(func)
+function button:addFunction(func)
   self.func=func
 end
 
-function mouseReleased()
+function button:mouseReleased()
   if X<p.mouseX and p.mouseX<X+width and Y<p.mouseY and p.mouseY<Y+height then
-  func()
+  self.func()
   end
 end
