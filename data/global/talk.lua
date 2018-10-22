@@ -1,33 +1,48 @@
-talk={}
-function talk:new()
+TalkWindow ={}
+function TalkWindow:new(_x,_y)
   local obj={}
-  return setmetatable(obj, {__index = talk})
+  TalkWindow.super=Character:new(_x,_y)
+  obj.x=_x
+  obj.y=_y
+  setmetatable(TalkWindow,{__index=Character})
+  setmetatable(obj,{__index=TalkWindow})
+  obj:handleSetup()
+  return obj
 end
-function talk:setup()
-  canResume=false
+
+function TalkWindow :setup()
+  self.canResume=false
+  self.X=0
+  self.Y=p.height-500
+  self.width=p.width
+  self.height=500
+  self.textSize=100
 end
-function talk:draw()
-  x=0
-  y=p.height-500
-  width=p.width
-  height=500
-  textSize=100
+function TalkWindow :draw()
   p:fill(0,0,255,100)
-  p:strokeJoin(ROUND)
+  p:strokeJoin(p.ROUND)
   p:strokeWeight(10)
   p:stroke(100)
-  p:rect(x+10,y+10,width-20,height-20)
-  p:textSize(textSize)
+  p:rect(self.X+10,self.Y+10,self.width-20,self.height-20)
+  p:textSize(self.textSize)
   p:fill(255)
-  if text then
-    p:text(text,x+20,y+20,width-20,height-20)
+  if self.text then
+    p:text(self.text,self.X+20,self.Y+20,self.width-20,self.height-20)
   end
 end
 
-function talk:mouseReleased()
-  if canResume then
-    kill()
-	   coroutine.resume(coro)
-	 else canResume=true
+function TalkWindow:mouseReleased()
+  if self.canResume then
+    self.dead=true
+    coroutine.resume(self.coro)
+	 else self.canResume=true
 	 end
+end
+
+function TalkWindow:setCoroutine(coro)
+  self.coro=coro
+end
+
+function TalkWindow:setText(text)
+  self.text=text
 end

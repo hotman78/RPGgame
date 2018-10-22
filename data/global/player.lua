@@ -4,20 +4,25 @@ function Player:new(_x,_y)
   Player.super=Character:new(_x,_y)
   obj.x=_x
   obj.y=_y
-  	obj.px=128*obj.x+64
-  	obj.py=128*obj.y+64
   setmetatable(Player,{__index=Character})
-  return setmetatable(obj,{__index=Player})
+  setmetatable(obj,{__index=Player})
+  obj:handleSetup()
+  return obj
 end
 
 function Player:setup()
-  self.super.setup(self)
+  self.isTalking=false
 end
 
 function Player:draw()
-  print("a")
   self:playerMove()
-  self.super.draw(self)
+end
+
+function Player:mouseReleased()
+  if p:dist(p.mouseX,p.mouseY,p.startX,p.startY)<50 and exist(self.fx,self.fy) and not self.isTalking then
+    self.isTalking=true
+    exist(self.fx,self.fy):handleTalk(self)
+  end
 end
 
 function Player:playerMove()

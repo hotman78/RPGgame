@@ -5,7 +5,6 @@ import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
 import java.io.*;
-public Stage stage;
 public Event event;
 public GestureDetector gestureDetector;
 public PApplet pApplet=this;
@@ -20,7 +19,6 @@ void onResume(){
 void setup(){
   textSize(30);
   event=new Event();
-  stage=new Stage();
   Activity act = getActivity();
   Context con = act.getApplicationContext();
   TouchManager tm=new TouchManager();
@@ -40,7 +38,7 @@ void draw(){
   }
   background(0);
   fill(255);
-  stage.draw();
+  stroke(255);
   event.draw();
   textSize(60);
   text(frameRate,0,60);
@@ -52,6 +50,10 @@ void draw(){
     }
   }
   pMousePressed=mousePressed;
+}
+
+void mouseReleased(){
+  event.doFunction("mouseReleased");
 }
 void setUI() {
   runOnUiThread(new Runnable() { 

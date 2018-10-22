@@ -11,6 +11,7 @@ class Event {
     globals.set("e", CoerceJavaToLua.coerce(this));
     doFunction("setup");
   }
+  
   private void loadAssets(String dir){
     AssetManager asset = getActivity().getResources().getAssets();
     try { 
