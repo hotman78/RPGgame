@@ -6,16 +6,16 @@ class Event {
   public Globals globals;
   Event() {
     globals=JsePlatform.standardGlobals();
-    loadAssets("");
+    loadAssets("src");
     globals.set("p", CoerceJavaToLua.coerce(pApplet));
     globals.set("e", CoerceJavaToLua.coerce(this));
+    globals.set("globals", CoerceJavaToLua.coerce(globals));
     doFunction("setup");
   }
   
   private void loadAssets(String dir){
     AssetManager asset = getActivity().getResources().getAssets();
     try { 
-      if(dir.equals("files"))return;
       String files[] =asset.list(dir);
       for(String file:files){
         if(file.equals("shaders"))return;
